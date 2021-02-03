@@ -1,0 +1,12 @@
+---
+version: '3.2'
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+volumes:
+  deb-db:
+  nix-storage:
+  bp-storage:
