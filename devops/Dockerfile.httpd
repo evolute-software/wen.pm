@@ -1,0 +1,12 @@
+#For Debug Purposes.  Shortly the debug loop.
+
+FROM httpd:2.4
+
+COPY  index.html   /usr/local/apache2/htdocs/
+COPY  dist /usr/local/apache2/htdocs/dist
+
+COPY devops /usr/local/apache2/devops
+RUN echo "Include devops/settie-fe*.conf" >> /usr/local/apache2/conf/httpd.conf
+
+RUN ls -l /usr/local/apache2
+
