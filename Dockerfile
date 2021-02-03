@@ -22,13 +22,13 @@ RUN npm run package
 #production stage
 FROM httpd:2.4-alpine
 
-ENV BACKEND_URL=https://focus-backend.saturn.industries
+ENV BACKEND_URL=https://backend.wen.pm
 
 COPY --from=build /usr/src/app/dist /usr/local/apache2/htdocs
 
 COPY devops /usr/local/apache2/devops
 RUN ls -l /usr/local/apache2
-RUN echo "Include devops/settie-fe*.conf" >> /usr/local/apache2/conf/httpd.conf
+RUN echo "Include devops/*.conf" >> /usr/local/apache2/conf/httpd.conf
 
 ENTRYPOINT ["/usr/local/apache2/devops/configure.sh"]
 CMD ["httpd-foreground"]
