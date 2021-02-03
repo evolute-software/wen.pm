@@ -7,8 +7,6 @@ var Elm = require('../elm/src/Main.elm').Elm;
 
 var app = Elm.Main.init({flags: []});
 
-
-
 // Particles  ////////////////////////////////////////////////////////////////
 particlesJS("particles-js", {
   particles: {
@@ -18,7 +16,6 @@ particlesJS("particles-js", {
       type: "polygon",
       stroke: { width: 0, color: "#725050" },
       polygon: { nb_sides: 5 },
-      //image: { src: "img/github.svg", width: 100, height: 100 }
     },
     opacity: {
       value: 1,
