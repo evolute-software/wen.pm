@@ -26,6 +26,8 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
+    "css-scroll-snap-polyfill": "^0.1.2",
+    "document-ready": "^2.0.2",
     "lodash": "^4.17.15"
   }
 }

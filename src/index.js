@@ -1,11 +1,17 @@
 'use strict';
 
 require('../elm/index.html');
-require('./particles.min.js')
+require('./particles.min.js');
+var ready = require('document-ready');
 import './style.scss';
+import scrollSnapPolyfill from 'css-scroll-snap-polyfill';
+
 var Elm = require('../elm/src/Main.elm').Elm;
 
 var app = Elm.Main.init({flags: []});
+
+// Polyfill scroll snapping because it is ridiculous
+//ready(scrollSnapPolyfill());
 
 // Particles  ////////////////////////////////////////////////////////////////
 particlesJS("particles-js", {

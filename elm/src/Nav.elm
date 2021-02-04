@@ -36,10 +36,6 @@ urls r =
             absolute [ "404" ] []
 
 
-
--- type Route = Home | Blog Int | NotFound
-
-
 route : Parser (Route -> a) a
 route =
     oneOf

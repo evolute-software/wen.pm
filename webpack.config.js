@@ -54,7 +54,8 @@ module.exports = {
   ],
   mode: 'development',
   devServer: {
-      host: "aurora.local",
+      host: "0.0.0.0",
+      public: "192.168.6.114:8001",
       inline: true,
       hot: true,
       stats: 'errors-only',

@@ -3,21 +3,14 @@ $body-color: rgb(159, 3, 19);
 $body-transp: rgba(159, 3, 19,0.5);
 $white: #FFF;
 
-html { font-size: 120%; }
+html {
+  font-size: 120%; 
+
+}
 body, a, span, button { font-size: 1rem; }
 
-.app {
-  position:absolute;
-  top: 0;
-  left: 0;
-  padding:none;
-  margin:none;
-  width:100%;
-  height:100%;
-  z-index: 0;
-}
 div {
-  word-break: break-all;
+  word-break: break-word;
 }
 a, a:hover, a:active {
   color: $white;
@@ -28,18 +21,82 @@ body {
   color: $white;
   font-family: sans-serif;
   margin: 0;
+
+  // html for all browsers except safari...
+  scroll-snap-type: mandatory;
+  -webkit-scroll-snap-type: mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+body > h1 {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  text-align: center;
 }
 
+div.content {
+  position: relative;
+  text-align: center;
+  margin-top: 4em;
 
+  div.events {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width:100%;
+
+    scroll-snap-type: y mandatory;
+    -webkit-scroll-snap-type: y mandatory;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: scroll;
+
+    div.event.footer { border: none;}
+    div.event.title {
+      border: none;
+      font-style: italic;
+
+    }
+    div.event {
+      min-width: 240px;
+      width: 70%;
+      max-width: 640px;
+
+      margin: auto;
+      margin-bottom: 5em;
+      border: 3px solid;
+      border-radius: 1em;
+      padding: 2em 0.5em;
+      font-size: 2em;
+      
+      scroll-snap-align: center;
+
+      h2 {
+        font-style: italic;
+      }
+    } 
+  }
+}
+div.nav {
+  position: fixed;
+  bottom:0;
+  width: 100%;
+  text-align: center;
+  background-color: $body-color;
+}
 /**************** Particles **********************/
 canvas {
   display: block;
   vertical-align: bottom;
-} /* ---- particles.js container ---- */
+}
+/* ---- particles.js container ---- */
 #particles-js {
   z-index: -1000;
-  position: absolute;
+
+  position: fixed;
   width: 100%;
   height: 100%;
+  top: 0;
+
   background-color: $body-color;
+
 }
