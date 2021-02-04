@@ -54,7 +54,7 @@ module.exports = {
   ],
   mode: 'development',
   devServer: {
-      host: "cianodyne.local",
+      host: "aurora.local",
       inline: true,
       hot: true,
       stats: 'errors-only',

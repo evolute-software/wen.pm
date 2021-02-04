@@ -63,4 +63,4 @@ protocol =
 
 host : String
 host =
-    "cianodyne.local:13342"
+    "aurora.local:13342"
