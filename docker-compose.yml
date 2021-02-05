@@ -5,8 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    ports:
+    - "42005:80"
+
 
 volumes:
   deb-db:
-  nix-storage:
-  bp-storage:

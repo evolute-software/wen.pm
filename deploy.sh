@@ -1,0 +1,1 @@
+../services.kindstudios.gr/deploy.sh

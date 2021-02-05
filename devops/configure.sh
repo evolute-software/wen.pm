@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 ##
 ## Configure the main frontend for the container and set the window.backendUrl
