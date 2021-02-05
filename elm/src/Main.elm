@@ -2,12 +2,11 @@ module Main exposing (main)
 
 import Browser exposing (Document, UrlRequest(..), application)
 import Browser.Navigation as BN exposing (Key)
+import CardanoProtocol as CP
 import Html exposing (Html, a, button, div, h1, h2, span, text)
 import Html.Attributes as Attr exposing (class, classList, id, style)
 import Html.Events exposing (onClick)
-import Http
 import Json.Decode exposing (Value)
-import Nav
 import Task
 import Time
 import Url exposing (Url)
@@ -31,8 +30,10 @@ main =
 
 events : List Event
 events =
-    [ Event "Shelley" <| Just 1596491091
+    [ Event "Byron" <| Just 1596491091
+    , Event "Shelley" <| Just 1596491091
     , Event "k=500" <| Just 1596491091
+    , Event "Rewards" Nothing -- ToDo: introduce sum type
     , Event "d=0" <| Just 1617227091
     , Event "Native Assets" <| Just 1617327091
     , Event "Goguen" Nothing
@@ -168,6 +169,7 @@ titleBox : Html msg
 titleBox =
     div [ class "event", class "title" ]
         [ h1 [] [ Html.text "Wen.!?" ]
+        , div [] [ Html.text "Your one stop shop to Cardano, its roadmap and the Cardano community!" ]
         ]
 
 
@@ -194,28 +196,106 @@ getEventBoxes model =
 
 renderBox : Time.Posix -> Event -> Html msg
 renderBox time event =
-    div [ class "event" ]
-        [ h2 [] [ Html.text event.title ]
-        , getBoxContents time event
-        ]
-
-
-getBoxContents : Time.Posix -> Event -> Html msg
-getBoxContents time event =
     case event.unix of
         Just ts ->
             let
                 secs =
                     ts - toUnix time
+
+                seconds =
+                    modBy 60 secs
+
+                minutes =
+                    modBy 60 <| secs // 60
+
+                hours =
+                    modBy 24 <| secs // 3600
+
+                days =
+                    secs // (3600 * 24)
             in
             if secs > 0 then
-                div [] [ Html.text <| String.fromInt <| secs ]
+                div [ class "event" ]
+                    [ h2 [] [ Html.text event.title ]
+                    , div [ class "qbang" ] [ Html.text "!?" ]
+                    , div [ class "countdown" ]
+                        [ renderTimeItem "Days" days
+                        , renderTimeItem "Hours" hours
+                        , renderTimeItem "Minutes" minutes
+                        , renderTimeItem "Seconds" seconds
+                        ]
+                    ]
 
             else
-                div [] [ Html.text "DONE!" ]
+                div [ class "event", class "done" ]
+                    [ h2 [] [ Html.text event.title ]
+                    , div [ class "qbang" ] [ Html.text "!?" ]
+                    , div [ class "done" ] [ Html.text "DONE!" ]
+                    ]
 
         Nothing ->
-            div [] [ Html.text "soon™" ]
+            if event.title == "Rewards" then
+                renderRewardsTile time event
+
+            else
+                renderSoonTile event
+
+
+renderRewardsTile : Time.Posix -> Event -> Html msg
+renderRewardsTile time event =
+    div [ class "event", class "rewards" ]
+        [ h2 [] [ Html.text event.title ]
+        , div [ class "qbang" ] [ Html.text "!?" ]
+        , div []
+            [ renderEpochTile time event -1
+            , renderEpochTile time event 0
+            ]
+        ]
+
+
+renderEpochTile : Time.Posix -> Event -> Int -> Html msg
+renderEpochTile time event offset =
+    let
+        epoch =
+            CP.getEpoch offset time
+
+        payout =
+            CP.rewardsPayout epoch
+
+        secsToPayout =
+            payout - toUnix time
+
+        minutesToPay =
+            modBy 60 <| secsToPayout // 60
+
+        hoursToPay =
+            modBy 24 <| secsToPayout // 3600
+
+        daysToPay =
+            secsToPayout // (3600 * 24)
+    in
+    div [ class "epoch" ]
+        [ div [ class "epoch-number" ] [ Html.text <| "E" ++ String.fromInt epoch ]
+        , renderTimeItem "Days" daysToPay
+        , renderTimeItem "Hours" hoursToPay
+        , renderTimeItem "Minutes" minutesToPay
+        ]
+
+
+renderTimeItem : String -> Int -> Html msg
+renderTimeItem name value =
+    div [ class "time-item", class <| String.toLower name ]
+        [ div [ class "value" ] [ Html.text <| String.fromInt value ]
+        , div [ class "title" ] [ Html.text <| name ]
+        ]
+
+
+renderSoonTile event =
+    div [ class "event" ]
+        [ h2 [] [ Html.text event.title ]
+        , div [ class "qbang" ] [ Html.text "!?" ]
+        , div [] [ Html.text "soon™" ]
+        ]
 
 
 toUnix : Time.Posix -> Int

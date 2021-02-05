@@ -17,7 +17,8 @@ var app = Elm.Main.init({flags: []});
 particlesJS("particles-js", {
   particles: {
     number: { value: 80, density: { enable: true, value_area: 800 } },
-    color: { value: "#9f0313" },
+    //color: { value: "#9f0313" },
+    color: { value: "#7d030f" },
     shape: {
       type: "polygon",
       stroke: { width: 0, color: "#725050" },
