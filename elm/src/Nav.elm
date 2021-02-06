@@ -2,8 +2,8 @@ module Nav exposing (Model, Msg(..), init, navbar, update)
 
 import Browser exposing (UrlRequest(..))
 import Events exposing (Event)
-import Html exposing (Html, a, div, input, label, nav, text)
-import Html.Attributes exposing (checked, class, for, href, id, type_)
+import Html exposing (Html, a, div, button, nav, text)
+import Html.Attributes exposing (class, for, href, style)
 import Html.Events exposing (onClick)
 
 
@@ -18,7 +18,8 @@ init =
 
 
 type Msg
-    = ToggleNav | UrlReq String
+    = ToggleNav
+    | UrlReq String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -26,8 +27,10 @@ update msg model =
     case msg of
         ToggleNav ->
             ( { model | open = not model.open }, Cmd.none )
+
         UrlReq req ->
-            ({ model | open = False }, Cmd.none)
+            ( { model | open = False }, Cmd.none )
+
 
 
 -- View
@@ -35,16 +38,24 @@ update msg model =
 
 navbar : List Events.Event -> Model -> Html Msg
 navbar events model =
-    nav []
-        [ label [ for "navbar" ] [ Html.text "🔴" ]
-        , input [ type_ "checkbox", id "navbar", checked model.open, onClick ToggleNav ] []
-        , div []
+    div [ class "nav", getDisplay model ] 
+    [ button [ onClick ToggleNav ] [ Html.text "🔴" ]
+    , nav []
+        [ -- input [ type_ "checkbox", id "navbar", checked model.open, ] []
+          div [class "list" ]
             (List.map
                 createNav
                 events
             )
         ]
+    ]
 
+getDisplay : Model -> Html.Attribute Msg
+getDisplay model = 
+    if model.open then
+        class "open"
+    else
+        class "closed"
 
 createNav : Event -> Html Msg
 createNav event =
@@ -52,4 +63,4 @@ createNav event =
         anchor =
             "#" ++ Events.htmlId event
     in
-    div [ class "nav-top" ] [ a [ href anchor, onClick <| UrlReq anchor ] [ text event.title ] ]
+    div [ class "item", class "nav-top" ] [ a [ href anchor, onClick <| UrlReq anchor ] [ text event.title ] ]

@@ -1,5 +1,5 @@
 
-//$body-color: rgb(159, 3, 19);
+$body-transparent: rgba(125, 3, 15, 0.85);
 $body-color: #7d030f;
 $white: #FFF;
 
@@ -38,39 +38,73 @@ body > h1 {
   text-align: center;
 }
 
-nav {
-    display: block;
+div.nav.open {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  background-color: $body-transparent;
+
+  button { top: 1.5em; left: 3em;}
+  nav {display: block;}
+}
+div.nav{
+  position: absolute;
+  bottom: 2em;
+  right: 2em;
+  overflow: hidden;
+  width: 1.3em;
+  height: 1.5em;
+
+  z-index: 1;
+
+  button {
     position: absolute;
-    bottom: 0;
-    right: 1rem;
-    padding: 1rem;
+    border: none;
+    background: transparent;
+    padding: 0;
+    z-index: 3;
+  }
+  nav {
+    position: relative;
+    display: none;
+    height: 100%;
+    padding: 0;
     text-align: right;
+    z-index: 1;
 
-    input { display: none; }
-    input:checked ~ div {display: block}
-    div{
-      display: none;
-      div{
-          display: block;
-          margin: 0.2rem;
-          padding: 0.3rem;
+    div.list{
+      position: relative;
+      height: 100%;
 
-          a, a:hover, a:active {
-              color: $white;
-              font-size: 1.3rem;
-              font-weight: bold;
-              font-style: oblique;
-              text-decoration: none;
-          }
+
+      overflow-y: scroll;
+
+  
+      div.item{
+        position: relative;
+        background-color: transparent;
+        display: block;
+        padding: 1.5em;
+  
+        a, a:hover, a:active {
+          color: $white;
+          font-size: 1.3em;
+          font-weight: bold;
+          font-style: oblique;
+          text-decoration: none;
+        }
       }
     }
+  }
 }
-
 div.content {
   position: relative;
   z-index: 0;
   text-align: center;
-  margin-top: 4em;
 
   div.events {
     position: fixed;
@@ -123,13 +157,20 @@ div.content {
         z-index: 1;
         font-style: italic;
       }
-      div.anchor {
+      div.anchor { // The navigation anchor div
         position: absolute;
         top: -50%;
       }
-      div.blurb {
-        font-style: italic;
+
+      div.info-box {
         font-size: 0.5em;
+        margin-bottom: 1em;
+        margin-top: -0.5em;
+
+        div.blurb {
+          font-style: italic;
+        }
+        a {}
       }
       div.qbang {
         position: absolute;
@@ -149,12 +190,13 @@ div.content {
         z-index: 1;
         width: 40%;
         min-width: 200px;
-        margin-top: 1em;
+        margin-bottom: 0.5em;
 
         div.time-item{
           z-index: 1;
           display: inline-block;
           margin: 0.2em;
+          margin-top: 0;
           div.title{
             z-index: 1;
             font-size: 0.3em;
@@ -171,13 +213,6 @@ div.content {
         background-size: cover;
     }
   }
-}
-div.nav {
-  position: fixed;
-  bottom:0;
-  width: 100%;
-  text-align: center;
-  background-color: $body-color;
 }
 /**************** Particles **********************/
 canvas {

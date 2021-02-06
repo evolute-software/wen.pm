@@ -171,14 +171,15 @@ view model =
         [ div [ class "content" ]
             [ div [ class "events" ] <| titleBox :: getEventBoxes model ++ [ footerBox ]
             ]
-        , div [ class "nav" ] [ getNavBar model ]
+        ,  getNavBar model
         , div [ id "particles-js" ] []
         ]
 
 
 getNavBar : Model -> Html Msg
 getNavBar model =
-    Nav.navbar model.events model.nav |> Html.map NavBar
+    Html.map NavBar <|
+        Nav.navbar model.events model.nav
 
 
 titleBox : Html msg
@@ -225,8 +226,7 @@ renderBox time event =
             if secs > 0 then
                 div [ class "event" ]
                     ([ h2 [] [ Html.text event.title ]
-                     , div [ class "blurb" ] [ Html.text <| Maybe.withDefault "" event.blurb ]
-                     , div [ class "anchor", id <| htmlId event ] []
+                     , infoBox event
                      , div [ class "qbang" ] [ Html.text "!?" ]
                      , div [ class "countdown" ]
                         [ renderTimeItem "Days" days
@@ -235,17 +235,17 @@ renderBox time event =
                         , renderTimeItem "Seconds" seconds
                         ]
                      ]
-                        ++ infoBox event
                     )
 
             else
                 div [ class "event", class "done" ]
-                    [ h2 [] [ Html.text event.title ]
-                    , div [ class "blurb" ] [ Html.text <| Maybe.withDefault "" event.blurb ]
-                    , div [ class "anchor", id <| htmlId event ] []
-                    , div [ class "qbang" ] [ Html.text "!?" ]
-                    , div [ class "done" ] [ Html.text "DONE!" ]
-                    ]
+                    ( [h2 [] [ Html.text event.title ]
+                     , infoBox event
+                     , div [ class "anchor", id <| htmlId event ] []
+                     , div [ class "qbang" ] [ Html.text "!?" ]
+                     , div [ class "done" ] [ Html.text "DONE!" ]
+                     ]
+                    )
 
         Nothing ->
             if event.title == "Rewards" then
@@ -255,13 +255,27 @@ renderBox time event =
                 renderSoonEvent event
 
 
-infoBox : Event -> List (Html msg)
+infoBox : Event -> Html msg
 infoBox event =
+    let
+        blurb =  div [ class "blurb" ] [ Html.text <| Maybe.withDefault "" event.blurb ]
+    in
     case event.url of
-        Nothing ->[]
-        Just u -> 
-            [ div [class "info-box"] [a [ href u] [Html.text u]]]
+        Nothing ->
+          div [ class "info-box" ]  [ blurb ]
 
+        Just u ->
+            let
+                link =  a [ href u, target "_new" ] [ Html.text <| "Link: " ++ getDomain u ]
+            in
+                div [ class "info-box" ]  [ blurb, link ]  
+
+getDomain : String -> String
+getDomain str = 
+    case Url.fromString str of
+        Nothing -> "bad URL"
+        Just url ->
+            url.host
 
 renderSoonEvent : Event -> Html msg
 renderSoonEvent event =
