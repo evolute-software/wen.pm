@@ -63,7 +63,7 @@ init flags url key =
     , Cmd.batch
         [ Task.perform AdjustTimeZone Time.here
         , Task.perform Tick Time.now
-        , Task.perform (\_ -> LoadStart) (Process.sleep 1200)
+        , Task.perform (\_ -> LoadStart) (Process.sleep 700)
         ]
     )
 
@@ -110,8 +110,9 @@ update msg model =
         GotUrlReq request ->
             case request of
                 Browser.Internal newUrl ->
-                    let 
-                        updated = {model | url = newUrl}
+                    let
+                        updated =
+                            { model | url = newUrl }
                     in
                     ( updated, BN.pushUrl model.key (Url.toString newUrl) )
 
@@ -223,20 +224,24 @@ renderBox time event =
             in
             if secs > 0 then
                 div [ class "event" ]
-                    [ h2 [] [ Html.text event.title ]
-                    , div [ class "anchor", id <| htmlId event ] []
-                    , div [ class "qbang" ] [ Html.text "!?" ]
-                    , div [ class "countdown" ]
+                    ([ h2 [] [ Html.text event.title ]
+                     , div [ class "blurb" ] [ Html.text <| Maybe.withDefault "" event.blurb ]
+                     , div [ class "anchor", id <| htmlId event ] []
+                     , div [ class "qbang" ] [ Html.text "!?" ]
+                     , div [ class "countdown" ]
                         [ renderTimeItem "Days" days
                         , renderTimeItem "Hours" hours
                         , renderTimeItem "Minutes" minutes
                         , renderTimeItem "Seconds" seconds
                         ]
-                    ]
+                     ]
+                        ++ infoBox event
+                    )
 
             else
                 div [ class "event", class "done" ]
                     [ h2 [] [ Html.text event.title ]
+                    , div [ class "blurb" ] [ Html.text <| Maybe.withDefault "" event.blurb ]
                     , div [ class "anchor", id <| htmlId event ] []
                     , div [ class "qbang" ] [ Html.text "!?" ]
                     , div [ class "done" ] [ Html.text "DONE!" ]
@@ -248,6 +253,14 @@ renderBox time event =
 
             else
                 renderSoonEvent event
+
+
+infoBox : Event -> List (Html msg)
+infoBox event =
+    case event.url of
+        Nothing ->[]
+        Just u -> 
+            [ div [class "info-box"] [a [ href u] [Html.text u]]]
 
 
 renderSoonEvent : Event -> Html msg
