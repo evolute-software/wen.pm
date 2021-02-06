@@ -3,10 +3,13 @@ module Main exposing (main)
 import Browser exposing (Document, UrlRequest(..), application)
 import Browser.Navigation as BN exposing (Key)
 import CardanoProtocol as CP
-import Html exposing (Html, a, button, div, h1, h2, span, text)
-import Html.Attributes as Attr exposing (class, classList, id, style)
+import Events exposing (Event, events, htmlId)
+import Html exposing (Html, a, button, div, h1, h2, img, span, text)
+import Html.Attributes as Attr exposing (class, href, id, src, style, target)
 import Html.Events exposing (onClick)
 import Json.Decode exposing (Value)
+import Nav
+import Process
 import Task
 import Time
 import Url exposing (Url)
@@ -28,27 +31,8 @@ main =
         }
 
 
-events : List Event
-events =
-    [ Event "Byron" <| Just 1596491091
-    , Event "Shelley" <| Just 1596491091
-    , Event "k=500" <| Just 1596491091
-    , Event "Rewards" Nothing -- ToDo: introduce sum type
-    , Event "d=0" <| Just 1617227091
-    , Event "Native Assets" <| Just 1617327091
-    , Event "Goguen" Nothing
-    , Event "Moon" Nothing
-    ]
-
-
 
 -- MODEL
-
-
-type alias Event =
-    { title : String
-    , unix : Maybe Int
-    }
 
 
 type alias Model =
@@ -58,6 +42,7 @@ type alias Model =
     , url : Url
     , key : Key
     , start : Int
+    , nav : Nav.Model
     }
 
 
@@ -72,11 +57,13 @@ init flags url key =
                 url
                 key
                 0
+                (Nav.Model False)
     in
     ( model
     , Cmd.batch
         [ Task.perform AdjustTimeZone Time.here
         , Task.perform Tick Time.now
+        , Task.perform (\_ -> LoadStart) (Process.sleep 1200)
         ]
     )
 
@@ -86,13 +73,27 @@ type Msg
     | AdjustTimeZone Time.Zone
     | GotUrlReq UrlRequest
     | GotUrlChange Url
+    | NavBar Nav.Msg
+    | LoadStart
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        LoadStart ->
+            case model.url.fragment of
+                Nothing ->
+                    ( model, BN.load "#native%20assets" )
+
+                Just _ ->
+                    ( model, Cmd.none )
+
         Tick newTime ->
-            ( updateTime model newTime
+            let
+                updatedModel =
+                    updateTime model newTime
+            in
+            ( updatedModel
             , Cmd.none
             )
 
@@ -108,11 +109,29 @@ update msg model =
 
         GotUrlReq request ->
             case request of
-                Browser.Internal url ->
-                    ( model, BN.pushUrl model.key (Url.toString url) )
+                Browser.Internal newUrl ->
+                    let 
+                        updated = {model | url = newUrl}
+                    in
+                    ( updated, BN.pushUrl model.key (Url.toString newUrl) )
 
                 Browser.External href ->
                     ( model, BN.load href )
+
+        NavBar navMsg ->
+            let
+                ( newM, newCmd ) =
+                    Nav.update navMsg model.nav
+
+                updatedModel =
+                    { model | nav = newM }
+            in
+            case navMsg of
+                Nav.UrlReq href ->
+                    ( updatedModel, BN.load href )
+
+                Nav.ToggleNav ->
+                    ( updatedModel, Cmd.map NavBar newCmd )
 
 
 updateTime : Model -> Time.Posix -> Model
@@ -144,15 +163,6 @@ subscriptions model =
 view : Model -> Document Msg
 view model =
     let
-        hour =
-            toFloat (Time.toHour model.zone model.time)
-
-        minute =
-            toFloat (Time.toMinute model.zone model.time)
-
-        second =
-            toFloat (Time.toSecond model.zone model.time)
-
         title =
             "WEN?!... Moon!"
     in
@@ -160,9 +170,14 @@ view model =
         [ div [ class "content" ]
             [ div [ class "events" ] <| titleBox :: getEventBoxes model ++ [ footerBox ]
             ]
-        , div [ class "nav" ] [ text "There will be NAV!" ]
+        , div [ class "nav" ] [ getNavBar model ]
         , div [ id "particles-js" ] []
         ]
+
+
+getNavBar : Model -> Html Msg
+getNavBar model =
+    Nav.navbar model.events model.nav |> Html.map NavBar
 
 
 titleBox : Html msg
@@ -176,17 +191,9 @@ titleBox =
 footerBox : Html msg
 footerBox =
     div [ class "event", class "footer" ]
-        [ h1 [] [ Html.text "🔴" ]
+        [ div [] [ Html.text "Made with love by" ]
+        , a [ href "https://spectrum-pool.kind.software", target "_new" ] [ img [ src "/assets/images/spec-logo-4-512.jpg" ] [] ]
         ]
-
-
-titleStyle : Model -> List (Html.Attribute msg)
-titleStyle model =
-    if toUnix model.time - model.start > 10 then
-        [ style "display" "none" ]
-
-    else
-        [ class "event", class "title" ]
 
 
 getEventBoxes : Model -> List (Html msg)
@@ -217,6 +224,7 @@ renderBox time event =
             if secs > 0 then
                 div [ class "event" ]
                     [ h2 [] [ Html.text event.title ]
+                    , div [ class "anchor", id <| htmlId event ] []
                     , div [ class "qbang" ] [ Html.text "!?" ]
                     , div [ class "countdown" ]
                         [ renderTimeItem "Days" days
@@ -229,32 +237,44 @@ renderBox time event =
             else
                 div [ class "event", class "done" ]
                     [ h2 [] [ Html.text event.title ]
+                    , div [ class "anchor", id <| htmlId event ] []
                     , div [ class "qbang" ] [ Html.text "!?" ]
                     , div [ class "done" ] [ Html.text "DONE!" ]
                     ]
 
         Nothing ->
             if event.title == "Rewards" then
-                renderRewardsTile time event
+                renderRewardsEvent time event
 
             else
-                renderSoonTile event
+                renderSoonEvent event
 
 
-renderRewardsTile : Time.Posix -> Event -> Html msg
-renderRewardsTile time event =
+renderSoonEvent : Event -> Html msg
+renderSoonEvent event =
+    div [ class "event" ]
+        [ h2 [] [ Html.text event.title ]
+        , div [ class "anchor", id <| htmlId event ] []
+        , div [ class "qbang" ] [ Html.text "!?" ]
+        , div [] [ Html.text "soon™" ]
+        ]
+
+
+renderRewardsEvent : Time.Posix -> Event -> Html msg
+renderRewardsEvent time event =
     div [ class "event", class "rewards" ]
         [ h2 [] [ Html.text event.title ]
+        , div [ class "anchor", id <| htmlId event ] []
         , div [ class "qbang" ] [ Html.text "!?" ]
         , div []
-            [ renderEpochTile time event -1
-            , renderEpochTile time event 0
+            [ renderEpochTile time -1
+            , renderEpochTile time 0
             ]
         ]
 
 
-renderEpochTile : Time.Posix -> Event -> Int -> Html msg
-renderEpochTile time event offset =
+renderEpochTile : Time.Posix -> Int -> Html msg
+renderEpochTile time offset =
     let
         epoch =
             CP.getEpoch offset time
@@ -287,14 +307,6 @@ renderTimeItem name value =
     div [ class "time-item", class <| String.toLower name ]
         [ div [ class "value" ] [ Html.text <| String.fromInt value ]
         , div [ class "title" ] [ Html.text <| name ]
-        ]
-
-
-renderSoonTile event =
-    div [ class "event" ]
-        [ h2 [] [ Html.text event.title ]
-        , div [ class "qbang" ] [ Html.text "!?" ]
-        , div [] [ Html.text "soon™" ]
         ]
 
 

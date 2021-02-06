@@ -7,6 +7,10 @@ services:
       dockerfile: Dockerfile
     ports:
     - "42005:80"
+    volumes:
+    - type: bind
+      source: ./assets
+      target: /usr/local/apache2/htdocs/assets
 
 
 volumes:

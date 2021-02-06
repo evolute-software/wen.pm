@@ -31,6 +31,8 @@ ENV BACKEND_URL=https://backend.wen.pm
 COPY --from=build /usr/src/app/dist /usr/local/apache2/htdocs
 
 COPY devops /usr/local/apache2/devops
+# Note: the assets folder is currently not bein included in the images
+
 RUN ls -l /usr/local/apache2
 RUN echo "Include devops/*.conf" >> /usr/local/apache2/conf/httpd.conf
 
