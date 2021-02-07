@@ -228,6 +228,7 @@ renderBox time event =
                 div [ class "event" ]
                     ([ h2 [] [ Html.text event.title ]
                      , infoBox event
+                     , div [ class "anchor", id <| htmlId event ] []
                      , div [ class "qbang" ] [ Html.text "!?" ]
                      , div [ class "countdown" ]
                         [ renderTimeItem "Days" days
