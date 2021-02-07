@@ -186,6 +186,7 @@ titleBox : Html msg
 titleBox =
     div [ class "event", class "title" ]
         [ h1 [] [ Html.text "Wen.!?" ]
+        , div [] [ Html.text "#WenRewards? #WenGoguen!? #WenStuff???" ]
         , div [] [ Html.text "Your one stop shop to Cardano, its roadmap and the Cardano community!" ]
         ]
 
