@@ -83,7 +83,7 @@ update msg model =
         LoadStart ->
             case model.url.fragment of
                 Nothing ->
-                    ( model, BN.load "#launch%20of%20catalyst%20fund4" )
+                    ( model, BN.load "#native%20assets" )
 
                 Just _ ->
                     ( model, Cmd.none )
