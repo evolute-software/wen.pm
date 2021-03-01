@@ -192,7 +192,9 @@ div.content {
         width: 40%;
         min-width: 200px;
         margin-bottom: 0.5em;
-
+        div.epoch-number {
+          font-size: 0.85em;
+        }
         div.time-item{
           z-index: 1;
           display: inline-block;
@@ -202,6 +204,10 @@ div.content {
             z-index: 1;
             font-size: 0.3em;
           }
+        }
+        div.epoch-label{
+            margin-bottom: 0.25em;
+            font-size: 0.3em;
         }
       }
       div.countdown{

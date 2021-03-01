@@ -3,7 +3,7 @@ module Main exposing (main)
 import Browser exposing (Document, UrlRequest(..), application)
 import Browser.Navigation as BN exposing (Key)
 import CardanoProtocol as CP
-import Events exposing (Event, events, htmlId)
+import Events exposing (Event, htmlId)
 import Html exposing (Html, a, button, div, h1, h2, img, span, text)
 import Html.Attributes as Attr exposing (class, href, id, src, style, target)
 import Html.Events exposing (onClick)
@@ -53,7 +53,7 @@ init flags url key =
             Model
                 Time.utc
                 (Time.millisToPosix 0)
-                events
+                []
                 url
                 key
                 0
@@ -91,7 +91,7 @@ update msg model =
         Tick newTime ->
             let
                 updatedModel =
-                    updateTime model newTime
+                    updateTime newTime model |> initEvents newTime
             in
             ( updatedModel
             , Cmd.none
@@ -135,8 +135,8 @@ update msg model =
                     ( updatedModel, Cmd.map NavBar newCmd )
 
 
-updateTime : Model -> Time.Posix -> Model
-updateTime model newTime =
+updateTime : Time.Posix -> Model -> Model
+updateTime newTime model =
     let
         newStart =
             if model.start == 0 then
@@ -146,6 +146,12 @@ updateTime model newTime =
                 model.start
     in
     { model | time = newTime, start = newStart }
+
+initEvents : Time.Posix -> Model -> Model
+initEvents newTime model = 
+    case model.events of
+        [] -> {model | events = Events.init newTime}
+        _ -> model
 
 
 
@@ -296,15 +302,17 @@ renderRewardsEvent time event =
         , div [ class "anchor", id <| htmlId event ] []
         , div [ class "qbang" ] [ Html.text "!?" ]
         , div []
-            [ renderEpochTile time -1
-            , renderEpochTile time 0
+            [ renderEpochTile time True
+            , renderEpochTile time False
             ]
         ]
 
 
-renderEpochTile : Time.Posix -> Int -> Html msg
-renderEpochTile time offset =
+renderEpochTile : Time.Posix -> Bool -> Html msg
+renderEpochTile time previous =
     let
+        offset = if previous then -1 else 0
+        epochLabel = if previous then "Previous Epoch" else "Current Epoch"
         epoch =
             CP.getEpoch offset time
 
@@ -324,10 +332,14 @@ renderEpochTile time offset =
             secsToPayout // (3600 * 24)
     in
     div [ class "epoch" ]
-        [ div [ class "epoch-number" ] [ Html.text <| "E" ++ String.fromInt epoch ]
+        [ 
+         div [ class "epoch-label" ] [ Html.text epochLabel ]
+        ,    div [ class "epoch-number" ] [ Html.text <| "E-" ++ String.fromInt epoch ]
+
         , renderTimeItem "Days" daysToPay
         , renderTimeItem "Hours" hoursToPay
         , renderTimeItem "Minutes" minutesToPay
+
         ]
 
 
@@ -343,44 +355,3 @@ toUnix : Time.Posix -> Int
 toUnix posix =
     round (toFloat (Time.posixToMillis posix) / 1000)
 
-
-
--- MAIN
---view : Model -> Document Msg
---view model =
---    let
---        mapBody toMsg body =
---            List.map (Html.map toMsg) body
---
---        notices =
---            Notifications.view model.notices |> List.map (Html.map GotNotify)
---
---        settings =
---            Settings.view model.settings |> mapBody GotSettings
---
---        title =
---            "Saturn Focus"
---
---        content =
---            case model.route of
---                Nav.Seasons ->
---                    Page.Seasons.view model.seasons |> Html.map GotSeasons
---
---                Nav.Profile ->
---                    Page.Profile.view model.settings
---
---                Nav.Season _ ->
---                    h1 [ class "season" ] [ text "Season Details" ]
---
---                Nav.NotFound ->
---                    h1 [ class "error" ] [ text "Not Found!" ]
---    in
---    Document title <|
---        [ div [ class "app" ]
---            [ Nav.navbar
---            , div [ class "application", classList [ ( "hidden", model.instrumentsHidden ) ] ] notices
---            , div [ class "application", classList [ ( "hidden", model.instrumentsHidden ) ] ] settings
---            , div [ class "content" ] [ content ]
---            ]
---        , div [ id "particles-js" ] []
---        ]
