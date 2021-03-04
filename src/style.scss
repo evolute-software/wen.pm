@@ -145,7 +145,7 @@ div.content {
       margin-bottom: 5em;
       border: 3px solid;
       border-radius: 1em;
-      padding: 2em 0.5em;
+      padding: 1em 0.2em;
       font-size: 2em;
       
       scroll-snap-align: center;
@@ -160,7 +160,7 @@ div.content {
       }
       div.anchor { // The navigation anchor div
         position: absolute;
-        top: -50%;
+        top: -20%;
       }
 
       div.info-box {

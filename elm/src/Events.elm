@@ -1,4 +1,4 @@
-module Events exposing (Event, init, htmlId)
+module Events exposing (Event, init, htmlId, next)
 
 import Url exposing (percentEncode)
 import Time
@@ -12,6 +12,37 @@ type alias Event =
     , blurb : Maybe String
     }
 
+next : Time.Posix -> List Event -> Event
+next p es =
+    let 
+        eNext = nextTimed p es
+    in
+     case eNext of
+         Nothing -> rewards
+         Just e -> e
+
+nextTimed : Time.Posix -> List Event -> Maybe Event
+nextTimed posix es = 
+    let
+        timeds = getTimed es
+        nexts = List.filter (isFuture posix) timeds
+    in
+      case nexts of
+          [] -> Nothing
+          n::ns -> Just n
+
+-- Not necessarily correct but good enough
+isFuture : Time.Posix -> Event -> Bool
+isFuture t e = not <| isPast t e
+
+getTimed : List Event -> List Event
+getTimed es = List.filter isTimed es
+
+isTimed : Event -> Bool
+isTimed e = 
+    case e.unix of
+        Nothing -> False
+        Just _ -> True
 
 htmlId : Event -> String
 htmlId event =
@@ -32,10 +63,8 @@ mairyUrl =
 goguenUrl =
     Just "https://roadmap.cardano.org/en/goguen/"
 
-fund4Url=
-    Just "https://www.crowdcast.io/e/fund4-1/register?utm_source=Project%20Catalyst%20Fund%202%2B3&utm_campaign=4bd2bef661-EMAIL_CAMPAIGN_2020_09_01_09_39_COPY_01&utm_medium=email&utm_term=0_2451b43b07-4bd2bef661-74067110"
 c360url= Just "https://www.crowdcast.io/e/hbe6af88"
-
+laccUrl= Just "https://lovelace.academy/"
 
 milestones : List Event
 milestones = 
@@ -55,8 +84,9 @@ milestones =
 
 streams : List Event
 streams =  
-    [ Event "Launch of Catalyst Fund4" (Just 1613584800) fund4Url <| Just "The next round in Cardano's community led development!" 
-    , Event "Cardano 360 webcast" (Just 1614274200) c360url <| Just "All the freshest news & feature content from across the Cardano ecosystem, delivered by Tim Harrison & Aparna Jue"
+    [
+    Event "Cardano 360 webcast" (Just 1616693400) c360url <| Just "All the freshest news & feature content from across the Cardano ecosystem, delivered by Tim Harrison & Aparna Jue"
+    , Event "Lovelace Academy 1st Show" (Just 1614803400) laccUrl <| Just "Tune in to the Lovelace Academy first educational video!"
     ]
 
 rewards : Event
@@ -72,6 +102,7 @@ isPast time e =
     case e.unix of
         Nothing -> False 
         Just u -> toUnix time - u > 0
+
 
 -- ToDo: the running part can only be implemented for events that have duration
 split : Time.Posix -> List Event -> (List Event, List Event, List Event)

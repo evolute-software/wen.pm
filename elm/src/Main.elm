@@ -83,7 +83,7 @@ update msg model =
         LoadStart ->
             case model.url.fragment of
                 Nothing ->
-                    ( model, BN.load "#native%20assets" )
+                    ( model, BN.load <| "#" ++ ( Events.htmlId <| Events.next model.time model.events))
 
                 Just _ ->
                     ( model, Cmd.none )
