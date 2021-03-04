@@ -3,7 +3,8 @@ module Main exposing (main)
 import Browser exposing (Document, UrlRequest(..), application)
 import Browser.Navigation as BN exposing (Key)
 import CardanoProtocol as CP
-import Events exposing (Event, htmlId)
+import Events
+import Model.Event exposing (Event, htmlId)
 import Html exposing (Html, a, button, div, h1, h2, img, span, text)
 import Html.Attributes as Attr exposing (class, href, id, src, style, target)
 import Html.Events exposing (onClick)
@@ -83,7 +84,7 @@ update msg model =
         LoadStart ->
             case model.url.fragment of
                 Nothing ->
-                    ( model, BN.load <| "#" ++ ( Events.htmlId <| Events.next model.time model.events))
+                    ( model, BN.load <| "#" ++ ( htmlId <| Events.next model.time model.events))
 
                 Just _ ->
                     ( model, Cmd.none )

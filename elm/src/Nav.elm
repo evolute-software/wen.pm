@@ -1,7 +1,7 @@
 module Nav exposing (Model, Msg(..), init, navbar, update)
 
 import Browser exposing (UrlRequest(..))
-import Events exposing (Event)
+import Model.Event exposing (Event)
 import Html exposing (Html, a, div, button, nav, text)
 import Html.Attributes exposing (class, for, href, style)
 import Html.Events exposing (onClick)
@@ -36,7 +36,7 @@ update msg model =
 -- View
 
 
-navbar : List Events.Event -> Model -> Html Msg
+navbar : List Event -> Model -> Html Msg
 navbar events model =
     div [ class "nav", getDisplay model ] 
     [ button [ onClick ToggleNav ] [ Html.text "🔴" ]
@@ -61,6 +61,6 @@ createNav : Event -> Html Msg
 createNav event =
     let
         anchor =
-            "#" ++ Events.htmlId event
+            "#" ++ Model.Event.htmlId event
     in
     div [ class "item", class "nav-top" ] [ a [ href anchor, onClick <| UrlReq anchor ] [ text event.title ] ]
