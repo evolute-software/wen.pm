@@ -1,13 +1,70 @@
-module Events exposing (init, next)
+module Events exposing (Model, Msg(..), getEvents, getNextTimed, init, next, split, update)
 
+import Debug
 import EventsStatic as ES
+import Http
 import Model.Event as E exposing (Event)
 import Time
+import Url exposing (Protocol(..))
 
 
+type alias Model =
+    { streams : List E.Event
+    , streamsRemote : List E.Event
+    , milestones : List E.Event
+    , milestonesRemote : List E.Event
+    , rewards : E.Event
+    , loadingStreams : HttpReqStatus
+    , loadingMilestones : HttpReqStatus
+    }
 
--- TODO:
--- sum type of Rewards | Milestone title unix url blurb | Stream title unix url blurb duration repetition | Moon
+
+init : Model
+init =
+    Model
+        ES.streams
+        []
+        ES.milestones
+        []
+        E.Rewards
+        None
+        None
+
+
+type Msg
+    = LoadStreams
+    | LoadingStreams
+    | GotStreams (Result Http.Error (List Event))
+
+
+type HttpReqStatus
+    = None
+    | Fetching
+    | Complete
+    | Error
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        LoadStreams ->
+            ( model
+            , Http.get
+                { url = "https://events.wen.pm/streams.json"
+                , expect = Http.expectJson GotStreams E.decodeStream
+                }
+            )
+
+        LoadingStreams ->
+            ( { model | loadingStreams = Fetching }, Cmd.none )
+
+        GotStreams result ->
+            case result of
+                Ok streams ->
+                    ( { model | loadingStreams = Complete, streamsRemote = streams }, Cmd.none )
+
+                Err _ ->
+                    ( { model | loadingStreams = Debug.log "JSON deserialization" Error }, Cmd.none )
 
 
 next : Time.Posix -> List Event -> Event
@@ -18,7 +75,7 @@ next p es =
     in
     case eNext of
         Nothing ->
-            ES.rewards
+            E.Rewards
 
         Just e ->
             e
@@ -62,19 +119,19 @@ split time es =
 -- see: https://package.elm-lang.org/packages/elm/core/latest/List#sortBy
 
 
-init : Time.Posix -> List Event
-init time =
+getEvents : Model -> Time.Posix -> List Event
+getEvents model time =
     let
         ( doneMilestones, _, futureMilestones ) =
-            split time ES.milestones
+            model.milestones ++ model.milestonesRemote |> split time
 
         ( doneStreams, liveStreams, futureStreams ) =
-            split time ES.streams
+            model.streams ++ model.streamsRemote |> split time
 
         completed =
-            List.sortBy E.comparableTime (doneMilestones ++ doneStreams)
+            List.sortBy E.forceTimestamp (doneMilestones ++ doneStreams)
 
         future =
-            List.sortBy E.comparableTime (futureMilestones ++ futureStreams)
+            List.sortBy E.forceTimestamp (futureMilestones ++ futureStreams)
     in
-    completed ++ [ ES.rewards ] ++ liveStreams ++ future
+    completed ++ (model.rewards :: liveStreams) ++ future

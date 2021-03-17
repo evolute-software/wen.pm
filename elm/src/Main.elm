@@ -4,11 +4,12 @@ import Browser exposing (Document, UrlRequest(..), application)
 import Browser.Navigation as BN exposing (Key)
 import CardanoProtocol as CP
 import Events
-import Model.Event exposing (Event, htmlId)
 import Html exposing (Html, a, button, div, h1, h2, img, span, text)
 import Html.Attributes as Attr exposing (class, href, id, src, style, target)
 import Html.Events exposing (onClick)
+import Http
 import Json.Decode exposing (Value)
+import Model.Event as ME exposing (Event)
 import Nav
 import Process
 import Task
@@ -39,7 +40,7 @@ main =
 type alias Model =
     { zone : Time.Zone
     , time : Time.Posix
-    , events : List Event
+    , events : Events.Model
     , url : Url
     , key : Key
     , start : Int
@@ -54,7 +55,7 @@ init flags url key =
             Model
                 Time.utc
                 (Time.millisToPosix 0)
-                []
+                Events.init
                 url
                 key
                 0
@@ -64,6 +65,7 @@ init flags url key =
     , Cmd.batch
         [ Task.perform AdjustTimeZone Time.here
         , Task.perform Tick Time.now
+        , Task.perform EventsMsg <| Task.succeed Events.LoadStreams
         , Task.perform (\_ -> LoadStart) (Process.sleep 700)
         ]
     )
@@ -76,6 +78,7 @@ type Msg
     | GotUrlChange Url
     | NavBar Nav.Msg
     | LoadStart
+    | EventsMsg Events.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -84,7 +87,7 @@ update msg model =
         LoadStart ->
             case model.url.fragment of
                 Nothing ->
-                    ( model, BN.load <| "#" ++ ( htmlId <| Events.next model.time model.events))
+                    ( model, BN.load <| "#" ++ (ME.htmlId <| Events.next model.time <| Events.getEvents model.events model.time) )
 
                 Just _ ->
                     ( model, Cmd.none )
@@ -92,7 +95,7 @@ update msg model =
         Tick newTime ->
             let
                 updatedModel =
-                    updateTime newTime model |> initEvents newTime
+                    updateTime newTime model
             in
             ( updatedModel
             , Cmd.none
@@ -135,6 +138,13 @@ update msg model =
                 Nav.ToggleNav ->
                     ( updatedModel, Cmd.map NavBar newCmd )
 
+        EventsMsg m ->
+            let
+                ( eModel, eCmd ) =
+                    Events.update m model.events
+            in
+            ( { model | events = eModel }, Cmd.map EventsMsg eCmd )
+
 
 updateTime : Time.Posix -> Model -> Model
 updateTime newTime model =
@@ -148,19 +158,13 @@ updateTime newTime model =
     in
     { model | time = newTime, start = newStart }
 
-initEvents : Time.Posix -> Model -> Model
-initEvents newTime model = 
-    case model.events of
-        [] -> {model | events = Events.init newTime}
-        _ -> model
-
 
 
 -- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Time.every 1000 Tick
 
 
@@ -178,7 +182,7 @@ view model =
         [ div [ class "content" ]
             [ div [ class "events" ] <| titleBox :: getEventBoxes model ++ [ footerBox ]
             ]
-        ,  getNavBar model
+        , getNavBar model
         , div [ id "particles-js" ] []
         ]
 
@@ -186,7 +190,7 @@ view model =
 getNavBar : Model -> Html Msg
 getNavBar model =
     Html.map NavBar <|
-        Nav.navbar model.events model.nav
+        Nav.navbar (Events.getEvents model.events model.time) model.nav
 
 
 titleBox : Html msg
@@ -208,89 +212,102 @@ footerBox =
 
 getEventBoxes : Model -> List (Html msg)
 getEventBoxes model =
-    List.map (renderBox model.time) model.events
+    List.map (renderBox model.time) <| Events.getEvents model.events model.time
 
 
 renderBox : Time.Posix -> Event -> Html msg
 renderBox time event =
-    case event.unix of
-        Just ts ->
-            let
-                secs =
-                    ts - toUnix time
+    case event of
+        ME.Rewards ->
+            renderRewardsEvent time event
 
-                seconds =
-                    modBy 60 secs
+        ME.Stream s ->
+            renderBoxWithTime time s.unix event
 
-                minutes =
-                    modBy 60 <| secs // 60
+        ME.Milestone m ->
+            case m.unix of
+                Just ts ->
+                    renderBoxWithTime time ts event
 
-                hours =
-                    modBy 24 <| secs // 3600
+                Nothing ->
+                    renderSoonEvent event
 
-                days =
-                    secs // (3600 * 24)
-            in
-            if secs > 0 then
-                div [ class "event" ]
-                    ([ h2 [] [ Html.text event.title ]
-                     , infoBox event
-                     , div [ class "anchor", id <| htmlId event ] []
-                     , div [ class "qbang" ] [ Html.text "!?" ]
-                     , div [ class "countdown" ]
-                        [ renderTimeItem "Days" days
-                        , renderTimeItem "Hours" hours
-                        , renderTimeItem "Minutes" minutes
-                        , renderTimeItem "Seconds" seconds
-                        ]
-                     ]
-                    )
 
-            else
-                div [ class "event", class "done" ]
-                    ( [h2 [] [ Html.text event.title ]
-                     , infoBox event
-                     , div [ class "anchor", id <| htmlId event ] []
-                     , div [ class "qbang" ] [ Html.text "!?" ]
-                     , div [ class "done" ] [ Html.text "DONE!" ]
-                     ]
-                    )
+renderBoxWithTime : Time.Posix -> Int -> Event -> Html msg
+renderBoxWithTime time timestamp event =
+    let
+        secs =
+            timestamp - toUnix time
 
-        Nothing ->
-            if event.title == "Rewards" then
-                renderRewardsEvent time event
+        seconds =
+            modBy 60 secs
 
-            else
-                renderSoonEvent event
+        minutes =
+            modBy 60 <| secs // 60
+
+        hours =
+            modBy 24 <| secs // 3600
+
+        days =
+            secs // (3600 * 24)
+    in
+    if secs > 0 then
+        div [ class "event" ]
+            [ h2 [] [ Html.text <| ME.getTitle event ]
+            , infoBox event
+            , div [ class "anchor", id <| ME.htmlId event ] []
+            , div [ class "qbang" ] [ Html.text "!?" ]
+            , div [ class "countdown" ]
+                [ renderTimeItem "Days" days
+                , renderTimeItem "Hours" hours
+                , renderTimeItem "Minutes" minutes
+                , renderTimeItem "Seconds" seconds
+                ]
+            ]
+
+    else
+        div [ class "event", class "done" ]
+            [ h2 [] [ Html.text <| ME.getTitle event ]
+            , infoBox event
+            , div [ class "anchor", id <| ME.htmlId event ] []
+            , div [ class "qbang" ] [ Html.text "!?" ]
+            , div [ class "done" ] [ Html.text "DONE!" ]
+            ]
 
 
 infoBox : Event -> Html msg
 infoBox event =
     let
-        blurb =  div [ class "blurb" ] [ Html.text <| Maybe.withDefault "" event.blurb ]
+        blurb =
+            div [ class "blurb" ] [ Html.text <| ME.getBlurb event ]
     in
-    case event.url of
+    case ME.getUrl event of
         Nothing ->
-          div [ class "info-box" ]  [ blurb ]
+            div [ class "info-box" ] [ blurb ]
 
         Just u ->
             let
-                link =  a [ href u, target "_new" ] [ Html.text <| "Link: " ++ getDomain u ]
+                link =
+                    a [ href u, target "_new" ] [ Html.text <| "Link: " ++ getDomain u ]
             in
-                div [ class "info-box" ]  [ blurb, link ]  
+            div [ class "info-box" ] [ blurb, link ]
+
 
 getDomain : String -> String
-getDomain str = 
+getDomain str =
     case Url.fromString str of
-        Nothing -> "bad URL"
+        Nothing ->
+            "bad URL"
+
         Just url ->
             url.host
+
 
 renderSoonEvent : Event -> Html msg
 renderSoonEvent event =
     div [ class "event" ]
-        [ h2 [] [ Html.text event.title ]
-        , div [ class "anchor", id <| htmlId event ] []
+        [ h2 [] [ Html.text <| ME.getTitle event ]
+        , div [ class "anchor", id <| ME.htmlId event ] []
         , div [ class "qbang" ] [ Html.text "!?" ]
         , div [] [ Html.text "soon™" ]
         ]
@@ -299,8 +316,8 @@ renderSoonEvent event =
 renderRewardsEvent : Time.Posix -> Event -> Html msg
 renderRewardsEvent time event =
     div [ class "event", class "rewards" ]
-        [ h2 [] [ Html.text event.title ]
-        , div [ class "anchor", id <| htmlId event ] []
+        [ h2 [] [ Html.text <| ME.getTitle event ]
+        , div [ class "anchor", id <| ME.htmlId event ] []
         , div [ class "qbang" ] [ Html.text "!?" ]
         , div []
             [ renderEpochTile time True
@@ -312,8 +329,20 @@ renderRewardsEvent time event =
 renderEpochTile : Time.Posix -> Bool -> Html msg
 renderEpochTile time previous =
     let
-        offset = if previous then -1 else 0
-        epochLabel = if previous then "Previous Epoch" else "Current Epoch"
+        offset =
+            if previous then
+                -1
+
+            else
+                0
+
+        epochLabel =
+            if previous then
+                "Previous Epoch"
+
+            else
+                "Current Epoch"
+
         epoch =
             CP.getEpoch offset time
 
@@ -333,14 +362,11 @@ renderEpochTile time previous =
             secsToPayout // (3600 * 24)
     in
     div [ class "epoch" ]
-        [ 
-         div [ class "epoch-label" ] [ Html.text epochLabel ]
-        ,    div [ class "epoch-number" ] [ Html.text <| "E-" ++ String.fromInt epoch ]
-
+        [ div [ class "epoch-label" ] [ Html.text epochLabel ]
+        , div [ class "epoch-number" ] [ Html.text <| "E-" ++ String.fromInt epoch ]
         , renderTimeItem "Days" daysToPay
         , renderTimeItem "Hours" hoursToPay
         , renderTimeItem "Minutes" minutesToPay
-
         ]
 
 
@@ -355,4 +381,3 @@ renderTimeItem name value =
 toUnix : Time.Posix -> Int
 toUnix posix =
     round (toFloat (Time.posixToMillis posix) / 1000)
-
