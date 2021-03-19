@@ -1,11 +1,12 @@
 module Events exposing (Model, Msg(..), getEvents, getNextTimed, init, next, split, update)
 
 import Debug
-import EventsStatic as ES
 import Http
 import Model.Event as E exposing (Event)
+import Static.Events as ES
 import Time
 import Url exposing (Protocol(..))
+import Util
 
 
 type alias Model =
@@ -128,8 +129,11 @@ getEvents model time =
         ( doneStreams, liveStreams, futureStreams ) =
             model.streams ++ model.streamsRemote |> split time
 
+        filteredDoneStreams =
+            List.filter (E.isDisplayable time) doneStreams
+
         completed =
-            List.sortBy E.forceTimestamp (doneMilestones ++ doneStreams)
+            List.sortBy E.forceTimestamp (doneMilestones ++ filteredDoneStreams)
 
         future =
             List.sortBy E.forceTimestamp (futureMilestones ++ futureStreams)

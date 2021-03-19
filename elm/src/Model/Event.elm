@@ -1,4 +1,4 @@
-module Model.Event exposing (Event(..), TheMilestone, TheStream, decodeStream, forceTimestamp, getBlurb, getTimed, getTitle, getUrl, htmlId, isFuture, isPast)
+module Model.Event exposing (Event(..), TheMilestone, TheStream, decodeStream, forceTimestamp, getBlurb, getTimed, getTitle, getUrl, htmlId, isDisplayable, isEol, isFuture, isLiveNow, isPast)
 
 import Json.Decode exposing (Decoder, field, int, list, map, map6, string)
 import Time
@@ -144,7 +144,7 @@ isPast time e =
             False
 
         Stream s ->
-            toUnix time - s.unix > 0
+            toUnix time - s.unix - s.duration > 0
 
         Milestone m ->
             case m.unix of
@@ -153,6 +153,43 @@ isPast time e =
 
                 Just u ->
                     toUnix time - u > 0
+
+
+isLiveNow : Time.Posix -> Event -> Bool
+isLiveNow time e =
+    case e of
+        Stream s ->
+            let
+                beforeEnd =
+                    toUnix time - (s.unix + s.duration) < 0
+
+                afterStart =
+                    toUnix time - s.unix > 0
+            in
+            afterStart && beforeEnd
+
+        _ ->
+            False
+
+
+isDisplayable : Time.Posix -> Event -> Bool
+isDisplayable time e =
+    not <| isEol time e
+
+
+isEol : Time.Posix -> Event -> Bool
+isEol time e =
+    case e of
+        Stream s ->
+            toUnix time - s.unix - s.duration - streamsStayAroundFor > 0
+
+        _ ->
+            False
+
+
+streamsStayAroundFor : Int
+streamsStayAroundFor =
+    38 * 60 * 60
 
 
 toUnix : Time.Posix -> Int

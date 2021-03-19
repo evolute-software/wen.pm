@@ -2,19 +2,19 @@ module Main exposing (main)
 
 import Browser exposing (Document, UrlRequest(..), application)
 import Browser.Navigation as BN exposing (Key)
-import CardanoProtocol as CP
 import Events
-import Html exposing (Html, a, button, div, h1, h2, img, span, text)
-import Html.Attributes as Attr exposing (class, href, id, src, style, target)
-import Html.Events exposing (onClick)
-import Http
+import Html exposing (Html, div)
+import Html.Attributes exposing (class, href, id)
 import Json.Decode exposing (Value)
-import Model.Event as ME exposing (Event)
+import Model.Event as ME
 import Nav
 import Process
+import Static.Widgets as SW
 import Task
 import Time
 import Url exposing (Url)
+import Util
+import View.Events as VE
 
 
 
@@ -49,7 +49,7 @@ type alias Model =
 
 
 init : flags -> Url -> Key -> ( Model, Cmd Msg )
-init flags url key =
+init _ url key =
     let
         model =
             Model
@@ -151,7 +151,7 @@ updateTime newTime model =
     let
         newStart =
             if model.start == 0 then
-                toUnix newTime
+                Util.toUnix newTime
 
             else
                 model.start
@@ -177,10 +177,13 @@ view model =
     let
         title =
             "WEN?!... Moon!"
+
+        boxes =
+            SW.titleBox :: getEventBoxes model ++ [ SW.footerBox ]
     in
     Document title <|
         [ div [ class "content" ]
-            [ div [ class "events" ] <| titleBox :: getEventBoxes model ++ [ footerBox ]
+            [ div [ class "events" ] boxes
             ]
         , getNavBar model
         , div [ id "particles-js" ] []
@@ -193,191 +196,6 @@ getNavBar model =
         Nav.navbar (Events.getEvents model.events model.time) model.nav
 
 
-titleBox : Html msg
-titleBox =
-    div [ class "event", class "title" ]
-        [ h1 [] [ Html.text "Wen.!?" ]
-        , div [] [ Html.text "#WenRewards? #WenGoguen!? #WenStuff???" ]
-        , div [] [ Html.text "Your one stop shop to Cardano, its roadmap and the Cardano community!" ]
-        ]
-
-
-footerBox : Html msg
-footerBox =
-    div [ class "event", class "footer" ]
-        [ div [] [ Html.text "Made with love by" ]
-        , a [ href "https://spectrum-pool.kind.software", target "_new" ] [ img [ src "/assets/images/spec-logo-4-512.jpg" ] [] ]
-        ]
-
-
 getEventBoxes : Model -> List (Html msg)
 getEventBoxes model =
-    List.map (renderBox model.time) <| Events.getEvents model.events model.time
-
-
-renderBox : Time.Posix -> Event -> Html msg
-renderBox time event =
-    case event of
-        ME.Rewards ->
-            renderRewardsEvent time event
-
-        ME.Stream s ->
-            renderBoxWithTime time s.unix event
-
-        ME.Milestone m ->
-            case m.unix of
-                Just ts ->
-                    renderBoxWithTime time ts event
-
-                Nothing ->
-                    renderSoonEvent event
-
-
-renderBoxWithTime : Time.Posix -> Int -> Event -> Html msg
-renderBoxWithTime time timestamp event =
-    let
-        secs =
-            timestamp - toUnix time
-
-        seconds =
-            modBy 60 secs
-
-        minutes =
-            modBy 60 <| secs // 60
-
-        hours =
-            modBy 24 <| secs // 3600
-
-        days =
-            secs // (3600 * 24)
-    in
-    if secs > 0 then
-        div [ class "event" ]
-            [ h2 [] [ Html.text <| ME.getTitle event ]
-            , infoBox event
-            , div [ class "anchor", id <| ME.htmlId event ] []
-            , div [ class "qbang" ] [ Html.text "!?" ]
-            , div [ class "countdown" ]
-                [ renderTimeItem "Days" days
-                , renderTimeItem "Hours" hours
-                , renderTimeItem "Minutes" minutes
-                , renderTimeItem "Seconds" seconds
-                ]
-            ]
-
-    else
-        div [ class "event", class "done" ]
-            [ h2 [] [ Html.text <| ME.getTitle event ]
-            , infoBox event
-            , div [ class "anchor", id <| ME.htmlId event ] []
-            , div [ class "qbang" ] [ Html.text "!?" ]
-            , div [ class "done" ] [ Html.text "DONE!" ]
-            ]
-
-
-infoBox : Event -> Html msg
-infoBox event =
-    let
-        blurb =
-            div [ class "blurb" ] [ Html.text <| ME.getBlurb event ]
-    in
-    case ME.getUrl event of
-        Nothing ->
-            div [ class "info-box" ] [ blurb ]
-
-        Just u ->
-            let
-                link =
-                    a [ href u, target "_new" ] [ Html.text <| "Link: " ++ getDomain u ]
-            in
-            div [ class "info-box" ] [ blurb, link ]
-
-
-getDomain : String -> String
-getDomain str =
-    case Url.fromString str of
-        Nothing ->
-            "bad URL"
-
-        Just url ->
-            url.host
-
-
-renderSoonEvent : Event -> Html msg
-renderSoonEvent event =
-    div [ class "event" ]
-        [ h2 [] [ Html.text <| ME.getTitle event ]
-        , div [ class "anchor", id <| ME.htmlId event ] []
-        , div [ class "qbang" ] [ Html.text "!?" ]
-        , div [] [ Html.text "soon™" ]
-        ]
-
-
-renderRewardsEvent : Time.Posix -> Event -> Html msg
-renderRewardsEvent time event =
-    div [ class "event", class "rewards" ]
-        [ h2 [] [ Html.text <| ME.getTitle event ]
-        , div [ class "anchor", id <| ME.htmlId event ] []
-        , div [ class "qbang" ] [ Html.text "!?" ]
-        , div []
-            [ renderEpochTile time True
-            , renderEpochTile time False
-            ]
-        ]
-
-
-renderEpochTile : Time.Posix -> Bool -> Html msg
-renderEpochTile time previous =
-    let
-        offset =
-            if previous then
-                -1
-
-            else
-                0
-
-        epochLabel =
-            if previous then
-                "Previous Epoch"
-
-            else
-                "Current Epoch"
-
-        epoch =
-            CP.getEpoch offset time
-
-        payout =
-            CP.rewardsPayout epoch
-
-        secsToPayout =
-            payout - toUnix time
-
-        minutesToPay =
-            modBy 60 <| secsToPayout // 60
-
-        hoursToPay =
-            modBy 24 <| secsToPayout // 3600
-
-        daysToPay =
-            secsToPayout // (3600 * 24)
-    in
-    div [ class "epoch" ]
-        [ div [ class "epoch-label" ] [ Html.text epochLabel ]
-        , div [ class "epoch-number" ] [ Html.text <| "E-" ++ String.fromInt epoch ]
-        , renderTimeItem "Days" daysToPay
-        , renderTimeItem "Hours" hoursToPay
-        , renderTimeItem "Minutes" minutesToPay
-        ]
-
-
-renderTimeItem : String -> Int -> Html msg
-renderTimeItem name value =
-    div [ class "time-item", class <| String.toLower name ]
-        [ div [ class "value" ] [ Html.text <| String.fromInt value ]
-        , div [ class "title" ] [ Html.text <| name ]
-        ]
-
-
-toUnix : Time.Posix -> Int
-toUnix posix =
-    round (toFloat (Time.posixToMillis posix) / 1000)
+    List.map (VE.renderBox model.time) <| Events.getEvents model.events model.time

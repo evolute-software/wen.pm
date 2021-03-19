@@ -1,4 +1,4 @@
-module EventsStatic exposing (milestones, streams)
+module Static.Events exposing (milestones, streams)
 
 import Model.Event as ME exposing (Event)
 
@@ -24,14 +24,12 @@ milestones =
 
 streams : List Event
 streams =
-    [ ME.Stream <| ME.TheStream "Charles Hoskinson @ Blockchain Africa" "Charles holds a keynote at this years Blockchain Africa Conference" "en" "https://blockchainafrica.co/programme-2021/" 1616065200 3600 ]
+    [ ME.Stream <| ME.TheStream "Charles Hoskinson @ Blockchain Africa" "Charles holds a keynote at this years Blockchain Africa Conference" "en" "https://blockchainafrica.co/programme-2021/" 1616065200 3600
+    ]
 
 
 
--- Streams come from ajax now
---    [ ME.Stream "Cardano 360 webcast" Just "All the freshest news & feature content from across the Cardano ecosystem, delivered by Tim Harrison & Aparna Jue"
---    , ME.Stream "Lovelace Academy 1st Show" (Just 1614803400) laccUrl <| Just "Tune in to the Lovelace Academy first educational video!"
---    ]
+--, ME.Stream <| ME.TheStream "Running Stream" "a running one" "en" "https://do.co" 1616172575 7200
 
 
 byronUrl : Maybe String
@@ -52,13 +50,3 @@ mairyUrl =
 goguenUrl : Maybe String
 goguenUrl =
     Just "https://roadmap.cardano.org/en/goguen/"
-
-
-c360url : Maybe String
-c360url =
-    Just "https://www.crowdcast.io/e/hbe6af88"
-
-
-laccUrl : Maybe String
-laccUrl =
-    Just "https://lovelace.academy/"

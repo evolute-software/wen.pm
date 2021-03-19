@@ -219,6 +219,27 @@ div.content {
         background-image: url(/assets/images/charles-done-o60.png);
         background-size: cover;
     }
+    div.event.live-now {
+        color: #fff3b5;
+        a{
+          color: #fff3b5;
+        }
+        div.qbang {
+          color: #fff3b547;
+        }
+        div.live {
+          text-shadow: 0 0 5px #fff3b5;
+          animation-name: live-glow;
+          animation-duration: 4s;
+          animation-iteration-count: infinite;
+        }
+        @keyframes live-glow {
+          0%  {color: #fff3b5; text-shadow: 0 0 5px #fff3b5;}
+          30% {color: #fff3b500; text-shadow: 0 0 1px #fff3b510;}
+          60% {color: #fff3b5; text-shadow: 0 0 4px #fff3b5aa;}
+          80% {color: #fff3b5; text-shadow: 0 0 5px #fff3b5;}
+        }
+    }
   }
 }
 /**************** Particles **********************/
