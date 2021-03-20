@@ -118,7 +118,7 @@ renderDoneTile event =
         , infoBox event
         , div [ class "anchor", id <| ME.htmlId event ] []
         , div [ class "qbang" ] [ Html.text "!" ]
-        , div [ class "done" ] [ Html.text "DONE!" ]
+        , div [ class "done" ] [ Html.text "DONE" ]
         ]
 
 

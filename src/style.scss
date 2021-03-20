@@ -1,6 +1,7 @@
 
-$body-transparent: rgba(125, 3, 15, 0.85);
-$body-color: #7d030f;
+/*$body-transparent: rgba(105, 3, 35, 0.85);*/
+$body-transparent: #1a05120b;
+$body-color: #1a050b;
 $white: #FFF;
 
 @import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
@@ -157,6 +158,7 @@ div.content {
       h2 {
         z-index: 1;
         font-style: italic;
+        text-shadow: 0 0 3px #15151590;
       }
       div.anchor { // The navigation anchor div
         position: absolute;
