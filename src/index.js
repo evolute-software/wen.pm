@@ -10,9 +10,6 @@ var Elm = require('../elm/src/Main.elm').Elm;
 
 var app = Elm.Main.init({flags: []});
 
-// Polyfill scroll snapping because it is ridiculous
-//ready(scrollSnapPolyfill());
-
 // Particles  ////////////////////////////////////////////////////////////////
 particlesJS("particles-js", {
   particles: {
