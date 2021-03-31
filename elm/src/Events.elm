@@ -1,4 +1,4 @@
-module Events exposing (Model, Msg(..), getEvents, getNextTimed, init, next, split, update)
+module Events exposing (Model, Msg(..), Notifications(..), getEvents, getNextTimed, init, next, split, update)
 
 import Debug
 import Http
@@ -17,6 +17,19 @@ type alias Model =
     , rewards : E.Event
     , loadingStreams : HttpReqStatus
     , loadingMilestones : HttpReqStatus
+    , notifications : Notifications
+    }
+
+
+type Notifications
+    = Disabled
+    | Unknown
+    | Allowed (List Notif)
+
+
+type alias Notif =
+    { unix : Int
+    , title : String
     }
 
 
@@ -30,6 +43,7 @@ init =
         E.Rewards
         None
         None
+        Unknown
 
 
 type Msg

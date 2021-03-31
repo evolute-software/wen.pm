@@ -45,6 +45,7 @@ type alias Model =
     , key : Key
     , start : Int
     , nav : Nav.Model
+    , notifications : Events.Notifications
     }
 
 
@@ -60,6 +61,7 @@ init _ url key =
                 key
                 0
                 (Nav.Model False)
+                Events.Unknown
     in
     ( model
     , Cmd.batch
@@ -198,4 +200,4 @@ getNavBar model =
 
 getEventBoxes : Model -> List (Html msg)
 getEventBoxes model =
-    List.map (VE.renderBox model.time) <| Events.getEvents model.events model.time
+    List.map (VE.renderBox model.time model.notifications) <| Events.getEvents model.events model.time

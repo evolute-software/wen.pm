@@ -1,7 +1,7 @@
 
-/*$body-transparent: rgba(105, 3, 35, 0.85);*/
-$body-transparent: #1a050bf0;
 $body-color: #1a050b;
+$body-transparent: #1a050bf0;
+$body-transparent-light: #15040990;
 $white: #FFF;
 
 @import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
@@ -151,7 +151,8 @@ div.content {
       
       scroll-snap-align: center;
 
-      background-color: rgba(0,0,0,0.11);
+      background-color: rgba(0,0,0,0.27);
+      background-color: $body-transparent-light;
 
       overflow: hidden;
 
@@ -163,6 +164,31 @@ div.content {
       div.anchor { // The navigation anchor div
         position: absolute;
         top: -20%;
+      }
+
+      div.notification { 
+        /** Hide this for now */
+        display: none;
+        width: 1em;
+        position: absolute;
+        top: 0.5em;
+        right: 0.5em;
+
+        div.dialogue {
+            position:absolute;
+            left: -50px;
+            font-size: 0.35em;
+            text-align: right;
+        }
+
+        img{
+          /**
+            Based on:
+                https://stackoverflow.com/a/53336754/2684881
+                https://codepen.io/sosuke/pen/Pjoqqp
+          */
+          filter: invert(100%) sepia(93%)  saturate(0%) hue-rotate(201deg) brightness(106%) contrast(106%);
+        }
       }
 
       div.info-box {

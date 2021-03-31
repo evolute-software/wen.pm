@@ -2,27 +2,28 @@ module View.Events exposing (renderBox)
 
 import CardanoProtocol as CP
 import Debug
-import Html exposing (Html, a, div, h2)
-import Html.Attributes exposing (class, href, id, target)
+import Events
+import Html exposing (Html, a, div, h2, img, text)
+import Html.Attributes exposing (class, href, id, src, target)
 import Model.Event as ME
 import Time
 import Url exposing (Url)
 import Util
 
 
-renderBox : Time.Posix -> ME.Event -> Html msg
-renderBox time event =
+renderBox : Time.Posix -> Events.Notifications -> ME.Event -> Html msg
+renderBox time notifications event =
     case event of
         ME.Rewards ->
             renderRewardsEvent time event
 
         ME.Stream s ->
-            renderBoxWithTime time s.unix event
+            renderBoxWithTime time s.unix notifications event
 
         ME.Milestone m ->
             case m.unix of
                 Just ts ->
-                    renderBoxWithTime time ts event
+                    renderBoxWithTime time ts notifications event
 
                 Nothing ->
                     renderSoonEvent event
@@ -49,8 +50,8 @@ renderRewardsEvent time event =
 -- TIMED ----------------------------------------------------------------------
 
 
-renderBoxWithTime : Time.Posix -> Int -> ME.Event -> Html msg
-renderBoxWithTime time timestamp event =
+renderBoxWithTime : Time.Posix -> Int -> Events.Notifications -> ME.Event -> Html msg
+renderBoxWithTime time timestamp notifications event =
     let
         isDone =
             ME.isPast time event
@@ -65,11 +66,11 @@ renderBoxWithTime time timestamp event =
         renderDoneTile event
 
     else
-        renderCountdown time timestamp event
+        renderCountdown time timestamp notifications event
 
 
-renderCountdown : Time.Posix -> Int -> ME.Event -> Html msg
-renderCountdown time timestamp event =
+renderCountdown : Time.Posix -> Int -> Events.Notifications -> ME.Event -> Html msg
+renderCountdown time timestamp notifications event =
     let
         secs =
             timestamp - Util.toUnix time
@@ -88,6 +89,7 @@ renderCountdown time timestamp event =
     in
     div [ class "event" ]
         [ h2 [] [ Html.text <| ME.getTitle event ]
+        , notificationButton notifications event
         , infoBox event
         , div [ class "anchor", id <| ME.htmlId event ] []
         , div [ class "qbang" ] [ Html.text "!?" ]
@@ -98,6 +100,36 @@ renderCountdown time timestamp event =
             , renderTimeItem "Seconds" seconds
             ]
         ]
+
+
+notificationButton : Events.Notifications -> ME.Event -> Html msg
+notificationButton notifications event =
+    case notifications of
+        Events.Unknown ->
+            div [ class "notification" ]
+                [ div [ class "dialogue" ] [ text "enable notifications" ]
+                ]
+
+        Events.Disabled ->
+            div [ class "notification" ]
+                [ div [ class "dialogue" ] [ text "notifications disabled" ]
+                ]
+
+        Events.Allowed ns ->
+            let
+                exists =
+                    List.any (\notif -> notif.title == ME.getTitle event) ns
+            in
+            case exists of
+                False ->
+                    div [ class "notification" ]
+                        [ img [ src "/assets/icons/sets/wire/svg/001-alarm-bell.svg" ] []
+                        ]
+
+                True ->
+                    div [ class "notification" ]
+                        [ img [ src "/assets/icons/sets/solid/svg/001-alarm-bell.svg" ] []
+                        ]
 
 
 renderLiveTile : ME.Event -> Html msg
