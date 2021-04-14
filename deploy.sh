@@ -22,7 +22,16 @@ cd $( dirname $0 )
 PRJ=$( basename $PWD )
 HOST=hermes.devices.kindstudios.gr
 
-echo "Deploying: $PRJ"
+
+[ $# -gt 0 ] && [ "$1" = "--only-nginx" ] && ONLY_NGINX=true || ONLY_NGINX=false
+
+
+echo "Syntax:
+  $0 --only-nginx
+
+Deploying: $PRJ
+"
+
 
 # use ./* to skip hidden files like .git
 rsync -avuz ./* ${HOST}:/opt/web/${PRJ}/
@@ -32,6 +41,13 @@ INSTALL="cd /opt/web/$PRJ &&
 	docker-compose up -d --force-recreate &&
 	mv ${PRJ}.conf /etc/nginx/virtual-hosts/ &&
 	systemctl restart nginx"
+
+if $ONLY_NGINX
+then
+  INSTALL="cd /opt/web/$PRJ && 
+  	mv ${PRJ}.conf /etc/nginx/virtual-hosts/ &&
+  	systemctl restart nginx"
+fi
 
 ssh $HOST  "bash -c '$INSTALL'"
 
