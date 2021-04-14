@@ -228,6 +228,7 @@ renderSoonEvent : ME.Event -> Html msg
 renderSoonEvent event =
     div [ class "event" ]
         [ h2 [] [ Html.text <| ME.getTitle event ]
+        , infoBox event
         , div [ class "anchor", id <| ME.htmlId event ] []
         , div [ class "qbang" ] [ Html.text "!?" ]
         , div [] [ Html.text "soon™" ]
