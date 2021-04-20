@@ -16,7 +16,7 @@ milestones =
     , ME.Milestone <| ME.TheMilestone "Alonzo Feature Freeze" (Just 1625003091) Nothing <| Just "We lock down the code, this is the big one! After 2+ months of rigorous testing in the private and pioneers testnets the codebase will have been ironed out. Now we freeze the codebase and run stress tests on the networks one more time to ensure everyting is rock sollid because next comes..."
     , ME.Milestone <| ME.TheMilestone "Goguen" (Just 1627595091) goguenUrl <| Just "The Alonzo HFC. Full Smart Contract functionality, Haskell and formally verified DAOs, ERC-20 importers on the Cardano mainnet"
     , ME.Milestone <| ME.TheMilestone "Pergamon" Nothing pergamonUrl <| Just "An experiment about human collaboration and NFTs"
-    , ME.Milestone <| ME.TheMilestone "Africa" Nothing Nothing <| Just "Rumors around IOHK and Africa abound. Will we get an announcement soon?"
+    , ME.Milestone <| ME.TheMilestone "Africa" (Just 1619713800) (Just "https://africa.cardano.org/") <| Just "Rumors around IOHK and Africa abound. Will we get an announcement soon?"
     , ME.Milestone <| ME.TheMilestone "Voltaire" Nothing Nothing Nothing
     , ME.Milestone <| ME.TheMilestone "Basho" Nothing Nothing Nothing
     , ME.Milestone <| ME.TheMilestone "Moon" Nothing Nothing Nothing
