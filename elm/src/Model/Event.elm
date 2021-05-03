@@ -1,4 +1,4 @@
-module Model.Event exposing (Event(..), TheMilestone, TheStream, decodeStream, forceTimestamp, getBlurb, getTimed, getTitle, getUrl, htmlId, isDisplayable, isEol, isFuture, isLiveNow, isPast)
+module Model.Event exposing (Event(..), TheMilestone, TheStream, decodeStream, forceTimestamp, getBlurb, getDone, getTimed, getTitle, getUrl, htmlId, isConfirmed, isDisplayable, isEol, isFuture, isLiveNow, isPast)
 
 import Json.Decode exposing (Decoder, field, int, list, map, map6, string)
 import Time
@@ -14,6 +14,7 @@ type Event
 type alias TheMilestone =
     { title : String
     , unix : Maybe Int
+    , confirmed : Bool
     , url : Maybe String
     , blurb : Maybe String
     }
@@ -78,6 +79,23 @@ getTitle e =
             s.title
 
 
+getDone : Event -> String
+getDone e =
+    case e of
+        Milestone m ->
+            if m.confirmed then
+                "DONE"
+
+            else
+                "Confirming..."
+
+        Stream _ ->
+            "DONE"
+
+        _ ->
+            "well this was unexpected!"
+
+
 getBlurb : Event -> String
 getBlurb e =
     case e of
@@ -112,6 +130,16 @@ getUrl e =
 getTimed : List Event -> List Event
 getTimed es =
     List.filter isTimed es
+
+
+isConfirmed : Event -> Bool
+isConfirmed e =
+    case e of
+        Milestone m ->
+            m.confirmed
+
+        _ ->
+            True
 
 
 isTimed : Event -> Bool

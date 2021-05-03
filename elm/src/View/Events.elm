@@ -120,16 +120,15 @@ notificationButton notifications event =
                 exists =
                     List.any (\notif -> notif.title == ME.getTitle event) ns
             in
-            case exists of
-                False ->
-                    div [ class "notification" ]
-                        [ img [ src "/assets/icons/sets/wire/svg/001-alarm-bell.svg" ] []
-                        ]
+            if exists then
+                div [ class "notification" ]
+                    [ img [ src "/assets/icons/sets/wire/svg/001-alarm-bell.svg" ] []
+                    ]
 
-                True ->
-                    div [ class "notification" ]
-                        [ img [ src "/assets/icons/sets/solid/svg/001-alarm-bell.svg" ] []
-                        ]
+            else
+                div [ class "notification" ]
+                    [ img [ src "/assets/icons/sets/solid/svg/001-alarm-bell.svg" ] []
+                    ]
 
 
 renderLiveTile : ME.Event -> Html msg
@@ -145,12 +144,20 @@ renderLiveTile event =
 
 renderDoneTile : ME.Event -> Html msg
 renderDoneTile event =
-    div [ class "event", class "done" ]
+    let
+        doneClass =
+            if ME.isConfirmed event then
+                "done"
+
+            else
+                "confirming"
+    in
+    div [ class "event", class doneClass ]
         [ h2 [] [ Html.text <| ME.getTitle event ]
         , infoBox event
         , div [ class "anchor", id <| ME.htmlId event ] []
         , div [ class "qbang" ] [ Html.text "!" ]
-        , div [ class "done" ] [ Html.text "DONE" ]
+        , div [ class "done" ] [ Html.text <| ME.getDone event ]
         ]
 
 
