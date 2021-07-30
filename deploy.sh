@@ -32,21 +32,28 @@ echo "Syntax:
 Deploying: $PRJ
 "
 
-
 # use ./* to skip hidden files like .git
-rsync -avuz ./* ${HOST}:/opt/web/${PRJ}/
-
-INSTALL="cd /opt/web/$PRJ && 
-  docker-compose build &&
-	docker-compose up -d --force-recreate &&
-	mv ${PRJ}.conf /etc/nginx/virtual-hosts/ &&
-	systemctl restart nginx"
+ssh ${HOST} mkdir -p /opt/web/${PRJ}
+scp docker-compose.yml ${PRJ}.conf ${HOST}:/opt/web/${PRJ}/
+rsync -avuz ./assets/ ${HOST}:/opt/web/${PRJ}/assets
 
 if $ONLY_NGINX
 then
   INSTALL="cd /opt/web/$PRJ && 
   	mv ${PRJ}.conf /etc/nginx/virtual-hosts/ &&
   	systemctl restart nginx"
+else
+
+  docker-compose build
+  docker-compose push
+  
+  INSTALL="cd /opt/web/$PRJ && 
+    chown -R 82 assets
+    docker-compose pull &&
+  	docker-compose up -d --force-recreate &&
+  	mv ${PRJ}.conf /etc/nginx/virtual-hosts/ &&
+  	systemctl restart nginx"
+
 fi
 
 ssh $HOST  "bash -c '$INSTALL'"

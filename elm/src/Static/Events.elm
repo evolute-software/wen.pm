@@ -16,8 +16,11 @@ milestones =
     , ME.Milestone <| ME.TheMilestone "Alonzo SPO Testnet" (Just 1622307600) True alonzoSpoNetUrl <| Just "Private testnet for Goguen. Select SPOs and IOHK partners test the first version of the alonzo node."
 
     --, ME.Milestone <| ME.TheMilestone "Alonzo Pioneers Testnet" (Just ) False Nothing <| Just "The first public testnet for Goguen. The first batch of around 1k external Alonzo pioneers will get access to the Pioneers Testnet where the functionalities of Alonzo will be tested in close collaboration with IOHK."
-    , ME.Milestone <| ME.TheMilestone "Alonzo Feature Freeze" (Just 1625003091) False Nothing <| Just "We lock down the code, this is the big one! After 2+ months of rigorous testing in the private and pioneers testnets the codebase will have been ironed out. Now we freeze the codebase and run stress tests on the networks one more time to ensure everyting is rock sollid because next comes..."
-    , ME.Milestone <| ME.TheMilestone "Goguen" (Just 1627595091) False goguenUrl <| Just "The Alonzo HFC. Full Smart Contract functionality, Haskell and formally verified DAOs, ERC-20 importers on the Cardano mainnet"
+    --, ME.Milestone <| ME.TheMilestone "Alonzo Feature Freeze" (Just 1625003091) False Nothing <| Just "We lock down the code, this is the big one! After 2+ months of rigorous testing in the private and pioneers testnets the codebase will have been ironed out. Now we freeze the codebase and run stress tests on the networks one more time to ensure everyting is rock sollid because next comes..."
+    , ME.Milestone <| ME.TheMilestone "Alonzo White" (Just 1625608800) True goguenUrl <| Just "Invite only testnet to test the Alonzo HFC, Full Smart Contract functionality, continuing the evolution of Alonzo blue"
+    , ME.Milestone <| ME.TheMilestone "Alonzo Light Purple" Nothing False goguenUrl <| Just "Prep for scaling the testnet from 100s to 1000s of SPOs and 1000s of developers"
+    , ME.Milestone <| ME.TheMilestone "Alonzo Light Purple" Nothing False goguenUrl <| Just "Prep for scaling the testnet from 100s to 1000s of SPOs and 1000s of developers"
+    , ME.Milestone <| ME.TheMilestone "Goguen" Nothing False goguenUrl <| Just "The Alonzo HFC. Full Smart Contract functionality, Haskell and formally verified DAOs, ERC-20 importers on the Cardano mainnet"
     , ME.Milestone <| ME.TheMilestone "Pergamon" Nothing True pergamonUrl <| Just "An experiment about human collaboration and NFTs"
     , ME.Milestone <| ME.TheMilestone "Voltaire" Nothing True Nothing Nothing
     , ME.Milestone <| ME.TheMilestone "Basho" Nothing True Nothing Nothing
