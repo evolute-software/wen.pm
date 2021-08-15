@@ -32,6 +32,11 @@ echo "Syntax:
 Deploying: $PRJ
 "
 
+# build
+
+docker-compose build
+docker-compose push
+
 # use ./* to skip hidden files like .git
 ssh ${HOST} mkdir -p /opt/web/${PRJ}
 scp docker-compose.yml ${PRJ}.conf ${HOST}:/opt/web/${PRJ}/
