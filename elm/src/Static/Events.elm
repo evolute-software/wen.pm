@@ -18,9 +18,13 @@ milestones =
     --, ME.Milestone <| ME.TheMilestone "Alonzo Pioneers Testnet" (Just ) False Nothing <| Just "The first public testnet for Goguen. The first batch of around 1k external Alonzo pioneers will get access to the Pioneers Testnet where the functionalities of Alonzo will be tested in close collaboration with IOHK."
     --, ME.Milestone <| ME.TheMilestone "Alonzo Feature Freeze" (Just 1625003091) False Nothing <| Just "We lock down the code, this is the big one! After 2+ months of rigorous testing in the private and pioneers testnets the codebase will have been ironed out. Now we freeze the codebase and run stress tests on the networks one more time to ensure everyting is rock sollid because next comes..."
     , ME.Milestone <| ME.TheMilestone "Alonzo White" (Just 1625608800) True goguenUrl <| Just "Invite only testnet to test the Alonzo HFC, Full Smart Contract functionality, continuing the evolution of Alonzo blue"
-    , ME.Milestone <| ME.TheMilestone "Alonzo Light Purple" Nothing False goguenUrl <| Just "Prep for scaling the testnet from 100s to 1000s of SPOs and 1000s of developers"
-    , ME.Milestone <| ME.TheMilestone "Alonzo Light Purple" Nothing False goguenUrl <| Just "Prep for scaling the testnet from 100s to 1000s of SPOs and 1000s of developers"
-    , ME.Milestone <| ME.TheMilestone "Goguen" Nothing False goguenUrl <| Just "The Alonzo HFC. Full Smart Contract functionality, Haskell and formally verified DAOs, ERC-20 importers on the Cardano mainnet"
+    , ME.Milestone <| ME.TheMilestone "Alonzo Light Purple" (Just 1625608800) True goguenYtUrl <| Just "Prep for scaling the testnet from 100s to 1000s of SPOs and 1000s of developers"
+    , ME.Milestone <| ME.TheMilestone "Alonzo Dark Purple" (Just 1629410399) False goguenYtUrl <| Just "Open the testnet from the 100-300 participants of Light Purple to up to 1000"
+
+    -- Aug 23 Cardano Wallet Update
+    -- Sep 1 Testnet HardFork
+    , ME.Milestone <| ME.TheMilestone "Cardano Testnet Alonzo HFC" (Just 1630532701) False goguenYtUrl <| Just "The open, long running, cardano Testnet is forked into the Alonzo era. This is the last event before the Goguen mainnet launch"
+    , ME.Milestone <| ME.TheMilestone "Goguen" (Just 1631483101) False goguenUrl <| Just "The Alonzo HFC. Full Smart Contract functionality, Haskell and formally verified DAOs, ERC-20 importers on the Cardano mainnet"
     , ME.Milestone <| ME.TheMilestone "Pergamon" Nothing True pergamonUrl <| Just "An experiment about human collaboration and NFTs"
     , ME.Milestone <| ME.TheMilestone "Voltaire" Nothing True Nothing Nothing
     , ME.Milestone <| ME.TheMilestone "Basho" Nothing True Nothing Nothing
@@ -42,6 +46,11 @@ streams =
 
 
 --, ME.Stream <| ME.TheStream "Running Stream" "a running one" "en" "https://do.co" 1616172575 7200
+
+
+goguenYtUrl : Maybe String
+goguenYtUrl =
+    Just "https://www.youtube.com/watch?v=mnV4eWw37Ts"
 
 
 alonzoSpoNetUrl : Maybe String
