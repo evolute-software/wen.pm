@@ -25,7 +25,7 @@ milestones =
     -- Sep 1 Testnet HardFork
     , ME.Milestone <| ME.TheMilestone "Cardano Testnet Alonzo HFC" (Just 1630532701) True goguenYtUrl <| Just "The open, long running, cardano Testnet is forked into the Alonzo era. This is the last event before the Goguen mainnet launch"
     , ME.Milestone <| ME.TheMilestone "Goguen" (Just 1631483101) True goguenUrl <| Just "The Alonzo HFC. Full Smart Contract functionality, Haskell and formally verified DAOs, ERC-20 importers on the Cardano mainnet"
-    , ME.Milestone <| ME.TheMilestone "Ethereum" Nothing True (Just "https://pool.pm/asset1mlyc290hqxhawsu35yv5fald3vqsprwd6fjy64") <| Just "Fixing ETH by putting it on Cardano. Presale imminent!?"
+    , ME.Stream <| ME.TheStream "Ethereum" "Fixing ETH by putting it on Cardano. DeX imminent!?" "en" "https://twitter.com/ETH_on_Cardano" 1683575478 (12 * 60 * 60)
     , ME.Milestone <| ME.TheMilestone "CIP-1694" Nothing True cip1694Url <| Just "A revision of Cardano's on-chain governance system to support the new requirements for Voltaire"
     , ME.Milestone <| ME.TheMilestone "Voltaire" Nothing True voltaireUrl <| Just "Relinquishing control of Cardano to democratic principles"
     , ME.Milestone <| ME.TheMilestone "Pergamon" Nothing True pergamonUrl <| Just "An experiment about human collaboration and NFTs"
