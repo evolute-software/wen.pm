@@ -25,8 +25,10 @@ milestones =
     -- Sep 1 Testnet HardFork
     , ME.Milestone <| ME.TheMilestone "Cardano Testnet Alonzo HFC" (Just 1630532701) True goguenYtUrl <| Just "The open, long running, cardano Testnet is forked into the Alonzo era. This is the last event before the Goguen mainnet launch"
     , ME.Milestone <| ME.TheMilestone "Goguen" (Just 1631483101) True goguenUrl <| Just "The Alonzo HFC. Full Smart Contract functionality, Haskell and formally verified DAOs, ERC-20 importers on the Cardano mainnet"
+    , ME.Milestone <| ME.TheMilestone "Ethereum" Nothing True (Just "https://pool.pm/asset1mlyc290hqxhawsu35yv5fald3vqsprwd6fjy64") <| Just "Fixing ETH by putting it on Cardano. Presale imminent!"
+    , ME.Milestone <| ME.TheMilestone "CIP-1694" Nothing True cip1694Url <| Just "A revision of Cardano's on-chain governance system to support the new requirements for Voltaire"
+    , ME.Milestone <| ME.TheMilestone "Voltaire" Nothing True voltaireUrl <| Just "Relinquishing control of Cardano to democratic principles"
     , ME.Milestone <| ME.TheMilestone "Pergamon" Nothing True pergamonUrl <| Just "An experiment about human collaboration and NFTs"
-    , ME.Milestone <| ME.TheMilestone "Voltaire" Nothing True Nothing Nothing
     , ME.Milestone <| ME.TheMilestone "Basho" Nothing True Nothing Nothing
     , ME.Milestone <| ME.TheMilestone "Moon" Nothing True Nothing Nothing
     ]
@@ -46,6 +48,16 @@ streams =
 
 
 --, ME.Stream <| ME.TheStream "Running Stream" "a running one" "en" "https://do.co" 1616172575 7200
+
+
+voltaireUrl : Maybe String
+voltaireUrl =
+    Just "https://roadmap.cardano.org/en/voltaire/"
+
+
+cip1694Url : Maybe String
+cip1694Url =
+    Just "https://forum.cardano.org/t/what-is-cip-1694/111621"
 
 
 goguenYtUrl : Maybe String
